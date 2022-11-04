@@ -1,0 +1,71 @@
+package com.example.practice
+
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.os.Build
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.provider.MediaStore
+import android.view.View
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+    }
+
+    fun btnWelcomeClick(view: View){
+        val intent: Intent = Intent(this, WelcomeScreen::class.java)
+        intent.putExtra("username", "Guest")
+        startActivity(intent)
+    }
+
+    fun btnLoginClick(view: View){
+        val intent: Intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
+    }
+
+    fun implicitButtonClick(view: View){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            if(checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
+                openCamera()
+
+            else requestPermissions(arrayOf(Manifest.permission.CAMERA), 1234)
+        }
+        else{
+            openCamera()
+        }
+    }
+
+    private fun openCamera(){
+        val intent: Intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        startActivityForResult(intent, 1212)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if(requestCode == 1234 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            openCamera()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        val imageView = findViewById<ImageView>(R.id.imageView)
+
+        val bitmap: Bitmap = data?.extras?.get("data") as Bitmap
+
+        imageView.setImageBitmap(bitmap)
+    }
+}

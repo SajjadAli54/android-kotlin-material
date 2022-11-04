@@ -1,0 +1,21 @@
+collection: combinely display weidgets
+gridview
+drop down
+listview
+
+layouts: 
+
+absolute positioning: fix element by using x and y
+Viewgroup : every layout extends it and an activity is also viewgroup
+
+contraint, linear(horizontal and vertical), grid, frame, scroll
+
+linear layout properties
+by default orientation of linear layout is horizontal
+linear layout is responsive (we can assign values in percentage)
+gravity attribute: it is same as alignment(float in web). we can apply it on collection/widgets.
+gravity is for collection and layout gravity is for widgets
+we can set weight for layout and can assign sub-weight to childs. 1st set weightsum property of layout(optional value) and then  assign width 0 to widgets and then assign layout weight property.
+
+grid layout properies
+one item per cell.

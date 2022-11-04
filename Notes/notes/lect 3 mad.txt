@@ -1,0 +1,15 @@
+cannot initilize variable globaly that use findViewById
+use lateinit var as global it is safe
+
+androind cannot allow capital letter for res
+
+use @ when you want to point any file
+
+rules for action event handler
+1 method must be public (by default kotlin method is public)
+2 method return must be void (by default kotlin method return void)
+3 method must take view as parameter
+
+assign on clicjk listener
+btn.setOnClickListener {Log.d("tag1", "msg1")}
+

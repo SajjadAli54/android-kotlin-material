@@ -1,0 +1,660 @@
+<html>
+	<head>
+		<title>CS 193A - Background Processes</title>
+		<link rel="stylesheet" href="highlightjs/styles/default.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/highlightjs/styles/default.css">
+		<link rel="stylesheet" href="reveal/css/reveal.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/reveal/css/reveal.css">
+		<link rel="stylesheet" href="reveal/css/theme/white.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/reveal/css/theme/white.css">
+		<link rel="stylesheet" href="cs193a-slides.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/cs193a-slides.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+<!-- BEGIN SLIDES AREA -->
+
+<section class="titleslide">
+	<h1>CS 193A</h1>
+
+	<p>Background Processes</p>
+</section>
+
+<section>
+	<h1>Background Processes</h1>
+
+	<div class="figuresright">
+		<img src="https://miro.medium.com/max/1400/1*3aFERmJ2VK6rW4lmQlXOQg.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/text-to-speech.png" alt="figure" />
+	</div>
+	
+	<ul>
+		<li><strong>Background Processes:</strong> Processing data in the background is an important part of creating an Android application that is both responsive for your users as well as a good citizen on the Android platform.			
+		<li><B>Guiding Principle</B>
+			<ul>
+				<li>In general, any task that takes more than a few milliseconds should be delegated to a background thread.				
+			</ul>		
+	</ul>
+</section>
+
+<section>
+	<h1>Categories of background tasks</h1>	
+	<ul>
+		<li>Background tasks fall into one of the following main categories
+			<ul>
+				<li>Immediate
+				<li>Exact
+				<li>Expedited
+				<li>Deferred
+			</ul>
+	</ul>
+	<div class="figure">
+		<img src="https://chariotsolutions.com/wp-content/uploads/2021/01/Screen-Shot-2021-01-05-at-2.14.11-PM.png" height="350" />
+	</div>
+	
+</section>
+
+<section>
+	<h1>Background Tasks Explained</h1>
+	<ul>
+		<li>Immediate
+			<ul>
+				<li class="subbullet">This describes tasks that should end when the user leaves a certain scope or finishes an interaction. For these, you should create a separate Thread to run the task on
+			</ul>
+		<li>Exact
+			<ul>
+				<li class="subbullet">A task that must be executed at a particular point in time and they can use <a href="https://www.geeksforgeeks.org/how-to-build-a-simple-alarm-setter-app-in-android/">AlarmManager</a>.
+			</ul>
+		<li>Expedited
+			<ul>
+				<li class="subbullet">A task that needs to run as soon as possible can start an expedited job using <a href="https://developer.android.com/topic/libraries/architecture/workmanager/how-to/define-work#expedited">expedited work</a>.
+			</ul>
+			
+		<li>Deferred
+			<ul>
+				<li class="subbullet">Every task that is not directly connected to a user interaction and can run at any time in the future can be deferred. The recommended solution for deferred tasks is <a href="https://developer.android.com/topic/libraries/architecture/workmanager">WorkManager</a>.</a>
+			</ul>
+		<li>
+	</ul>
+	
+	
+</section>
+
+<section>
+	<h1>Foreground Service</h1>
+	<ul>
+		<li>Foreground services perform operations that are noticeable to the user
+		<li>Foreground services show a status bar notification, so that users are actively aware that your app is performing a task in the foreground and is consuming system resources
+		<li>Examples of apps that would use foreground services include the following:
+		<ul>
+			<li>A music player app that plays music in a foreground service. The notification might show the current song that is being played.
+			<li>A fitness app that records a user's run in a foreground service, after receiving permission from the user.
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Request the foreground service permission</h1>
+	<ul>
+		<li>Apps that target Android 9 (API level 28) or higher and use foreground services must request the FOREGROUND_SERVICE permission, as shown in the following code snippet
+		<ul>
+			<li class="subbullet">
+			<pre><code class="xml">
+&ltmanifest xmlns:android="http://schemas.android.com/apk/res/android" ...&gt
+
+    &ltuses-permission android:name="android.permission.FOREGROUND_SERVICE"/&gt
+
+    &ltapplication ...&gt
+        ...
+    &lt/application&gt
+&lt/manifest&gt
+			</pre></code>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Start a foreground service</h1>
+	<ul>
+		<li>Before you request the system to run a service as a foreground service, start the service itself
+		<li class="subbullet">
+		<pre><code class="java">
+Context context = getApplicationContext();
+Intent intent = new Intent(...); // Build the intent for the service
+context.startForegroundService(intent);
+		</pre></code>
+		<li>Inside the service, usually in <strong>onStartCommand()</strong>, you can request that your service run in the foreground. To do so, call <strong>startForeground()</strong>
+		<li class="subbullet">This method takes two parameters: a positive integer that uniquely identifies the notification in the status bar and the <strong>Notification</strong> object itself.
+	</ul>
+	
+</section>
+
+<section>
+	<h1>How to create a notification</h1>
+	<ul>
+		<li>Following is the code to create a sample notification
+		<li class="subbullet">
+		<pre><code class="java">
+Intent notificationIntent = new Intent(this, ExampleActivity.class);
+PendingIntent pendingIntent =
+        PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+Notification notification =
+          new Notification.Builder(this, CHANNEL_DEFAULT_IMPORTANCE)
+    .setContentTitle(getText(R.string.notification_title))
+    .setContentText(getText(R.string.notification_message))
+    .setSmallIcon(R.drawable.icon)
+    .setContentIntent(pendingIntent)
+    .setTicker(getText(R.string.ticker_text))
+    .build();
+
+// Notification ID cannot be 0.
+startForeground(ONGOING_NOTIFICATION_ID, notification);
+</pre></code>
+	</ul>
+</section>
+
+<section>
+	<h1>Remove a service from the foreground</h1>
+	<ul>
+		<li>To remove the service from the foreground, call <strong>stopForeground()</strong>.
+		<ul>
+			<li>This method takes a boolean, which indicates whether to remove the status bar notification as well. Note that the service continues to run.
+		</ul>
+		<li><strong>Declare foreground service types</strong>
+		<ul>
+			<li>If your app targets Android 10 (API level 29) or higher and accesses location information in a foreground service, declare the <strong>location</strong> foreground service type as an attribute of your <strong>&ltservice&gt</strong> component.
+			<li>If your app targets Android 11 (API level 30) or higher and accesses the camera or microphone in a foreground service, declare the <strong>camera</strong> or <strong>microphone</strong> foreground service types, respectively, as attributes of your <service> component.
+		</ul>
+	</ul>
+</section>
+<!--
+	Image URLS
+	1. Service Flags (https://ibb.co/L00rvf0)
+-->
+<section>
+	<h1>Example using location and camera</h1>
+	<ul>
+		<li>Look at the following example
+		<li class="subbullet">
+		<pre><code class="xml">
+&lt; manifest&gt;
+    ...
+    &lt;service ... android:foregroundServiceType="location|camera" /&gt;
+&lt;/manifest&gt;
+		</code></pre>
+	</ul>
+</section>
+
+<section>
+	<h1>Threading</h1>
+	<ul>
+		<li>Android creates one Thread - "UiThread" at the start of application.
+			<ul>
+				<li>UiThread is responsible for
+				<ul>
+					<li>Dispatching events to user interface widgets
+					<li>Drawing events
+					<li>Interaction with components
+				</ul>
+				<li>As mentioned, to keep your app responsive, you shouldn't run long-running tasks on the main thread (UiThread)								
+				<ul>					
+					<pre><code class="java">
+fun onClick(v: View) {
+    Thread(Runnable {
+        // a potentially time consuming task
+        val bitmap = processBitMap("image.png")
+        imageView.post {
+            imageView.setImageBitmap(bitmap)
+        }
+    }).start()
+}</pre></code>
+				</ul>
+			</ul>
+	</ul>
+	
+</section>
+
+<section>
+	<h1>Thread Pool</h1>
+	
+	<ul>
+		<li>Creating threads is expensive, so you should create a thread pool only once as your app initializes.
+		<li>Be sure to save the instance of the <a href="https://developer.android.com/reference/java/util/concurrent/ExecutorService">ExecutorService</a> either in your Application class or in a <a href="https://developer.android.com/training/dependency-injection/manual">dependency injection container</a>.
+		<ul>
+			<pre><code class="java">
+public class MyApplication extends Application {
+    ExecutorService executorService = Executors.newFixedThreadPool(4);
+}
+</code></pre>
+		</ul>
+		<li>Execution Code
+		<ul>
+			<pre><code class="java">
+ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+executorService.execute(new Runnable() {
+    public void run() {
+        System.out.println("Asynchronous task");
+    }
+});
+
+executorService.shutdown();
+</code></pre>
+		</ul>
+		
+	</ul>
+	
+	
+</section>
+
+<section>
+	<h1><code class="androidapi" data-class="java.util.concurrent.ExecutorService">Executer Service - Methods</code></h1>
+	<ul>
+		<li>execute(Runnable)
+		<li>submit(Runnable)
+		<li>submit(Callable)
+		<li>invokeAny(...)
+		<li>invokeAll(...)
+
+	</ul>
+	
+</section>
+<section>
+	<h1>Alarm Manager</h1>
+	<ul>
+		<li>Android AlarmManager allows you to access system alarm
+		<ul>
+			<li>The system invokes an exact alarm at a precise moment in the future. If your app targets Android 12 (API level 31) or higher, you must declare the "Alarms & reminders" special app access; otherwise, a SecurityException occurs.
+			<li>Your app can set exact alarms using one of the following methods.
+			<ul>
+				<li><strong>setExact()</strong>
+				<li class="subbullet">Invoke an alarm at a nearly precise time in the future, as long as other battery-saving measures aren't in effect				
+				<li><strong>setExactAndAllowWhileIdle()</strong>
+				<li class="subbullet">Invoke an alarm at a nearly precise time in the future, even if battery-saving measures are in effect
+				<li><strong>setAlarmClock()</strong>
+				<li class="subbullet">Invoke an alarm at a precise time in the future. Because these alarms are highly visible to users, the system never adjusts their delivery time.
+			</ul>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Acceptable use cases for setting an exact alarm</h1>
+	<ul>
+		<li>Your app should use exact alarms, and declare the associated permission and broadcast receivers, only if a user-facing function in your app requires precisely-timed actions, such as in the following situations:
+		<ul>
+			<li>Your app is an alarm clock app or a timer app
+			<li>Your app is a calendar app that shows notifications for upcoming events
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Declare the exact alarms permission</h1>
+	<ul>
+		<li>If your app targets Android 12 (API level 31) or higher, you must obtain the "Alarms & reminders" special app access. To do so, declare the <strong>SCHEDULE_EXACT_ALARM</strong>
+		<li class="subbullet">
+		<pre><code class="xml">
+&ltmanifest ...&gt
+    &ltuses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/&gt
+    &ltapplication ...&gt
+        ...
+    &lt/application&gt
+&lt/manifest&gt</pre></code>
+	</ul>
+</section>
+
+<section>
+	<h1>Alarm Manager Ways</h1>
+	<ul>
+	
+		<li class="subbullet">We have four ways in android alarm manager usage
+		<ol>
+			<li><strong>RTC</strong>
+			<li class="subbullet">This alarm will not wake up your device when alarm goes off
+			<li><strong>RTC_WAKEUP</strong>
+			<li class="subbullet">This alarm will wake up your device once the alarm goes off
+			<li><strong>ELAPSED_REALTIME</strong>
+			<li class="subbullet">This alarm will count the time duration from boot including the sleep time and will not wake up device as RTC
+			<li><strong>ELAPSED_REALTIME_WAKEUP</strong>
+			<li class="subbullet">This alarm will count the boot time and device idle time to make the alarm, once the alarm goes off then it will wakeup the device
+
+		</ol>
+	</ul>
+</section>
+
+<section>
+	<h1>How to set Alarm Manager</h1>
+	<ul>
+		<li>Step 1 - Get the alarm manager reference
+		<li class="subbullet"><pre><code class="java">AlarmManager alarmManager =
+			(AlarmManager) getSystemService(ALARM_SERVICE);</code></pre>
+		<li>Step 2 - Set the type of alarm you want to execute 
+		<ul>
+			<li><pre><code class="java">public void set (int type, long triggerAtMillis, PendingIntent operation)</code></pre>
+			<li><pre><code class="java">public void setExact (int type, long triggerAtMillis, PendingIntent operation)</code></pre>
+			<li><pre><code class="java">public void setInexactRepeating (int type, long triggerAtMillis, long intervalMillis, 
+			PendingIntent operation)</code></pre>
+			<li><pre><code class="java">public void setExactAndAllowWhileIdle (int type, long triggerAtMillis, PendingIntent operation)</code></pre>
+		</ul>
+		<li>Example
+		<ul>
+			<li class="subbullet"><pre><code class="java">alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()  
+                + (i * 1000), pendingIntent);</code></pre>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>WorkManager</h1>
+	
+	<ul>
+		<li>let's look at the WorkManager, which is part of Android Jetpack and is an Architecture Component. 
+		<li>It is the recommended solution for background work that is deferrable and requires guaranteed execution
+		<ul>
+			<pre><code class="xml">
+dependencies {
+    ...
+    implementation 'androidx.work:work-runtime:2.5.0'
+}
+</code></pre>
+		</ul>
+		<li>Before we write any code, let's first go over some basics regarding WorkManager. Below are some classes we'll be working with:
+		<ul>
+			<li>Worker
+			<li>WorkRequest
+			<li>WorkManager
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Classes Explained</h1>
+	<ul>
+		<li>Worker
+		<ul>
+			<li class="subbullet">A class that performs work synchronously on a background thread provided by <b>WorkManager</b>. To create a worker, we extend the class and override the <b>doWork()</b> method.
+		</ul>
+		<li>WorkRequest
+		<ul>
+			<li class="subbullet">The base class for specifying parameters for work that should be enqueued. It represents a request to do some work. When instantiating it, we need to pass in the worker that we want to run.
+		</ul>
+		<li>WorkManager
+		<ul>
+			<li class="subbullet">This enqueues deferrable work that is guaranteed to execute sometime after its Constraints are met. It schedules our WorkRequest and makes it run in a way that spreads out the load on the system resources while honoring the specified constraints.
+		</ul>
+	</ul>
+	
+</section>
+
+<section>
+	<h1>How does it work?</h1>
+	<ul><li class="subbullet">
+		<ol>
+			<li>Create a worker class or classes that extend <strong>Worker(context, workerParameters)</strong>
+			<li>These classes will overwrite <strong>doWork()</strong> that returns a Result
+			<li>Create a work request with either <strong>PeriodicWorkRequestBuilder</strong> or <strong>OneTimeWorkRequestBuilder</strong> and set constraints for your worker. 
+			<li>Using an instance of <strong>WorkManager</strong> for your context, call <strong>.enqueueUniquePeriodicWork(...)</strong> or <strong>.enqueueUniqueWork(...)</strong> or <strong>.enqueue(...)</strong> depending on your needs
+			<li>Wait for and react to Result returned from the <strong>Worker</strong>
+
+
+		</ol>
+	</ul>
+	
+</section>
+<section>
+	<h1>Step 1 - Worker Class Code</h1>
+	<ul>
+		<li class="subbullet">
+		<ul>
+			<pre><code class="java">
+class UploadWorker(appContext: Context, workerParams: WorkerParameters):
+       Worker(appContext, workerParams) {
+   override fun doWork(): Result {
+
+       // Do the work here--in this case, upload the images.
+       uploadImages()
+
+       // Indicate whether the work finished successfully with the Result
+       return Result.success()
+   }
+}</code></pre>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Possible Results</h1>
+	<ul>
+		<li>The <strong>Result</strong> returned from <strong>doWork()</strong> informs the WorkManager service whether the work succeeded and, in the case of failure, whether or not the work should be retried.
+		<ul>
+			<li><strong>Result.success():</strong> The work finished successfully.
+			<li><strong>Result.failure():</strong> The work failed.
+			<li><strong>Result.retry():</strong> The work failed and should be tried at another time according to its <a href="https://developer.android.com/topic/libraries/architecture/workmanager/how-to/define-work#retries_backoff">retry policy</a>.
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Step 2 - Work Request</h1>
+	<div class="figuresright">
+		<img src="https://developer.android.com/images/topic/libraries/architecture/workmanager/how-to/one-time-work-flow.png" tppabs="https://developer.android.com/images/topic/libraries/architecture/workmanager/how-to/one-time-work-flow.png" alt="figure" />
+	</div>
+	<ul>
+		<li>Work is defined in WorkManager via a <strong>WorkRequest</strong>. In order to schedule any work with WorkManager you must first create a WorkRequest object and then enqueue it.
+		<li class="subbullet"><pre><code class="java">val uploadWorkRequest: WorkRequest =
+   OneTimeWorkRequestBuilder<UploadWorker>()
+       .build()</code></pre>
+		<ul>
+			<li>WorkManager offers a lot of flexibility in how you schedule your work. You can schedule it to run <a href="https://developer.android.com/topic/libraries/architecture/workmanager/how-to/define-work#schedule_periodic_work">periodically</a> over an interval of time, or you can schedule it to run only <a href="https://developer.android.com/topic/libraries/architecture/workmanager/how-to/define-work#constraints">one time</a>.
+		</ul>
+		<li class="subbullet"><pre><code class="java">WorkManager
+    .getInstance(myContext)
+    .enqueue(uploadWorkRequest)</code></pre>
+	</ul>
+</section>
+
+<section>
+	<h1>Schedule periodic work</h1>
+	<ul>
+		<li>Your app may at times require that certain work runs periodically. For example, you may want to periodically backup your data, download fresh content in your app, or upload logs to a server
+		<ul>
+			<li class="subbullet"><pre><code class="java">val saveRequest =
+       PeriodicWorkRequestBuilder<SaveImageToFileWorker>(1, TimeUnit.HOURS)
+    // Additional configuration
+           .build()</code></pre>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Work constraints</h1>
+	<ul>
+		<li><a href="https://developer.android.com/reference/androidx/work/Constraints">Constraints</a> ensure that work is deferred until optimal conditions are met. The following constraints are available to WorkManager.		
+	</ul>
+	<br />
+	<table class="methodtable">
+		<tr>
+			<th>Constraints</th>
+			<th>Description</th>
+		</tr>
+		
+		<tr>
+			<td><code>NetworkType</code> <br /></td>
+			<td>Constrains the type of network required for your work to run. For example, Wi-Fi (UNMETERED).</td>
+		</tr>
+		
+		<tr>
+			<td><code>BatteryNotLow</code></td>
+			<td>When set to true, your work will not run if the device is in low battery mode</td>
+		</tr>
+		
+		<tr>
+			<td><code>RequiresCharging</code></td>
+			<td>When set to true, your work will only run when the device is charging</td>
+		</tr>
+		
+		<tr>
+			<td><code>DeviceIdle</code></td>
+			<td>When set to true, this requires the user’s device to be idle before the work will run. This can be useful for running batched operations that might otherwise have a negative performance impact on other apps running actively on the user’s device</td>
+		</tr>
+		
+		<tr>
+			<td><code>StorageNotLow</code></td>
+			<td>When set to true, your work will not run if the user’s storage space on the device is too low.</td>
+		</tr>
+
+	</table>
+</section>
+
+<section>
+	<h1>Constraints Example</h1>
+	<ul>
+		<li>To create a set of constraints and associate it with some work, create a <code>Constraints</code> instance using the <code>Contraints.Builder()</code> and assign it to your <code>WorkRequest.Builder()</code>.
+		<ul>
+			<li class="subbullet"><pre><code class="java">val constraints = Constraints.Builder()
+   .setRequiredNetworkType(NetworkType.UNMETERED)
+   .setRequiresCharging(true)
+   .build()
+
+val myWorkRequest: WorkRequest =
+   OneTimeWorkRequestBuilder<MyWork>()
+       .setConstraints(constraints)
+       .build()</code></pre>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Complete Code Example with input</h1>
+	<ul>
+		<li class="subbullet">
+		<ul>
+			<li class="subbullet"><pre><code class="java">// Define the Worker requiring input
+class UploadWork(appContext: Context, workerParams: WorkerParameters)
+   : Worker(appContext, workerParams) {
+
+   override fun doWork(): Result {
+       val imageUriInput =
+           inputData.getString("IMAGE_URI") ?: return Result.failure()
+
+       uploadFile(imageUriInput)
+       return Result.success()
+   }
+   ...
+}
+
+// Create a WorkRequest for your Worker and sending it input
+val myUploadWork = OneTimeWorkRequestBuilder<UploadWork>()
+   .setInputData(workDataOf(
+       "IMAGE_URI" to "http://..."
+   ))
+   .build()</code></pre>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Unique Work</h1>
+	<ul>
+		<li class="subbullet">
+		<ul>
+			<li>Use caution when enqueuing work to avoid duplication. For example, an app might try to upload its logs to a backend service every 24 hours
+			<li>If you aren't careful, you might end up enqueueing the same task many times, even though the job only needs to run once
+			<li>To overcome this we use <strong>Unique Work</strong>
+			<li class="subbullet">Unique work is a powerful concept that guarantees that you only have one instance of work with a particular name at a time.
+			<ul>
+				<li><pre><code class="java"><a href="https://developer.android.com/reference/androidx/work/WorkManager#enqueueUniqueWork(java.lang.String,%20androidx.work.ExistingWorkPolicy,%20androidx.work.OneTimeWorkRequest)">WorkManager.enqueueUniqueWork()</a></code> for one time work</pre>
+				<li><pre><code class="java"><a href="https://developer.android.com/reference/androidx/work/WorkManager#enqueueUniquePeriodicWork(java.lang.String,%20androidx.work.ExistingPeriodicWorkPolicy,%20androidx.work.PeriodicWorkRequest)">WorkManager.enqueueUniquePeriodicWork()</a> </code> for periodic work</pre>
+			</ul>
+			<li>Both of these accept three arguments
+			<ul>
+				<li><strong>uniqueWorkName</strong> - A String used to uniquely identify the work request.
+				<li><strong>existingWorkPolicy</strong> - An enum which tells WorkManager what to do if there's already an unfinished chain of work with that unique name. See conflict resolution policy for more information.
+				<li><strong>work</strong> - the WorkRequest to schedule.
+
+			</ul>
+			
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Example Code</h1>
+	<ul>
+		<li class="subbullet"><pre><code class="java">val sendLogsWorkRequest =
+       PeriodicWorkRequestBuilder<SendLogsWorker>(24, TimeUnit.HOURS)
+           .setConstraints(Constraints.Builder()
+               .setRequiresCharging(true)
+               .build()
+            )
+           .build()
+WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+           "sendLogs",
+           ExistingPeriodicWorkPolicy.KEEP,
+           sendLogsWorkRequest)</code></pre>
+	</ul>
+</section>
+
+<section>
+	<h1>Observing your work</h1>
+	<ul>
+		<li>At any point after enqueuing work, you can check its status by querying WorkManager by its <strong>name, id</strong> or by a <strong>tag</strong> associated with it.
+		<li class="subbullet"><pre><code class="java">// by id
+workManager.getWorkInfoById(syncWorker.id) // ListenableFuture&lt;WorkInfo&gt;
+
+// by name
+workManager.getWorkInfosForUniqueWork("sync") // ListenableFuture&lt;List&lt;WorkInfo&gt;&gt;
+
+// by tag
+workManager.getWorkInfosByTag("syncTag") // ListenableFuture&lt;List&lt;WorkInfo&gt;&gt;</code></pre></ul>
+</section>
+
+<section>
+	<h1>Observing your work - Continue</h1>
+	<ul>
+		<li class="subbullet">
+		<ul>
+			<li>The query returns a <strong><a href="https://guava.dev/releases/23.1-android/api/docs/com/google/common/util/concurrent/ListenableFuture.html">ListenableFuture</a></strong> of a <strong><a href="https://developer.android.com/reference/androidx/work/WorkInfo">WorkInfo</a></strong> object, which includes the id of the work, its tags, its current State, and any output data set via <code>Result.success(outputData)</code>.
+			<li class="subbullet"><pre><code class="java">workManager.getWorkInfoByIdLiveData(syncWorker.id)
+               .observe(viewLifecycleOwner) { workInfo ->
+   if(workInfo?.state == WorkInfo.State.SUCCEEDED) {
+       Snackbar.make(requireView(), 
+      R.string.work_completed, Snackbar.LENGTH_SHORT)
+           .show()
+   }
+}</code></pre>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Cancelling and stopping work</h1>
+	<ul>
+		<li class="subbullet">
+		<ul>
+			<li>If you no longer need your previously enqueued work to run, you can ask for it to be cancelled. Work can be cancelled by its <strong>name</strong>, <strong>id</strong> or by a <strong>tag</strong> associated with it.
+			<li class="subbullet"><pre><code class="java">// by id
+workManager.cancelWorkById(syncWorker.id)
+
+// by name
+workManager.cancelUniqueWork("sync")
+
+// by tag
+workManager.cancelAllWorkByTag("syncTag")</code></pre>
+		</ul>
+		<li><a href="https://developer.android.com/codelabs/android-workmanager-java#11">Complete Code Example - Step by Step Guide</a>
+	</ul>
+</section>
+
+
+<!-- END SLIDES AREA -->
+			</div>
+		</div>
+
+		<script src="highlightjs/highlight.pack.js" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/highlightjs/highlight.pack.js"></script>
+		<script src="cs193a-slides.js" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/cs193a-slides.js"></script>
+		<script src="reveal/js/reveal.js" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/reveal/js/reveal.js"></script>
+		<script>
+			initializeSlides();
+		</script>
+	</body>
+</html>

@@ -1,0 +1,679 @@
+<html>
+	<head>
+		<title>Lecture 4 - Intents</title>
+		<link rel="stylesheet" href="highlightjs/styles/default.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/highlightjs/styles/default.css">
+		<link rel="stylesheet" href="reveal/css/reveal.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/reveal/css/reveal.css">
+		<link rel="stylesheet" href="reveal/css/theme/white.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/reveal/css/theme/white.css">
+		<link rel="stylesheet" href="cs193a-slides.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/cs193a-slides.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+<!-- BEGIN SLIDES AREA -->
+
+<section class="titleslide">
+	<h1>CSC - 455</h1>
+
+	<p>Multiple Activities and Intents</p>
+</section>
+
+<section>
+	<h1>Multiple activities</h1>
+	
+	<ul>
+		<li>Many apps have multiple activities.
+			<ul>
+				<li>Example: address book app. main activity = contact list; clicking a contact goes to another activity for viewing details.
+			</ul>
+		<li>Activity A can launch Activity B in response to an event.
+			<ul>
+				<li>Data params can be passed and "returned" between them.
+			</ul>
+	</ul>
+	
+	<div class="figure">
+		<img src="images/multiple-activities.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/multiple-activities.png" alt="figure" />
+	</div>
+</section>
+
+<section>
+	<h1>Adding an activity</h1>
+	
+	<ul>
+		<li>in Android Studio, right click "<strong>app</strong>" at left: <strong>New</strong> &rarr; <strong>Activity</strong> (empty)
+			<ul>
+				<li>creates a new .XML file in <span class="filename">res/layouts</span>
+				<li>creates a new .java class in <span class="filename">src/java</span>
+				<li>adds information to <span class="filename">AndroidManifest.xml</span> about the activity (without this information, the app will not allow the activity)
+			</ul>
+	</ul>
+	
+	<div class="figure">
+		<img src="images/android-studio-add-activity.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/android-studio-add-activity.png" alt="figure" />
+	</div>
+</section>
+
+<section>
+	<h1>Activities in Manifest</h1>
+	
+	<ul>
+		<li>Every activity has an entry in project's <span class="filename">AndroidManifest.xml</span>, added automatically by Android Studio:
+	</ul>
+	
+	<pre><code class="xml">
+&lt;!-- AndroidManifest.xml --&gt;
+&lt;manifest ...&gt;
+    &lt;application ...&gt;
+        <em>&lt;activity</em> android:name=&quot;.MainActivity&quot;
+                  android:label=&quot;@string/app_name&quot; &gt;
+            ...
+        <em>&lt;/activity&gt;</em>
+
+        <em>&lt;activity</em> android:name=&quot;.SecondActivity&quot;
+                  android:label=&quot;@string/title_activity_second&quot;&gt;
+            ...
+        <em>&lt;/activity&gt;</em>
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</code></pre>
+</section>
+
+<section>
+	<h1>Intents</h1>
+	
+	<ul>
+		<li><strong>intent:</strong> an object representing a desired action;
+			<ul>
+				<li>used as a bridge between activities, for one to invoke another
+				<li>the activity can be in the same app or in a different app
+				<li>can store extra data to pass as "<strong>parameters</strong>" to that activity
+				<li>second activity can "<strong>return</strong>" information back to the caller if needed
+			</ul>
+	</ul>
+
+	<div class="figure">
+		<img src="images/intent.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/intent.png" alt="figure" />
+	</div>
+</section>
+
+<section>
+	<h1>Uses of Intents</h1>
+	
+	<ul>
+		<li>to start an <strong>activity</strong> from another activity in the same app
+			<ul>
+				<li>e.g. <code>Activity1</code> launches <code>Activity2</code>
+			</ul>
+		<li>to start a <strong>service</strong>
+			<ul>
+				<li>seen later;  a service is a long-running app with no GUI
+				<li>system services include camera, phone dialer, music player, ...
+			</ul>
+		<li>to <strong>broadcast</strong> a message to another app or service
+			<ul>
+				<li>other apps can listen and respond to messages
+			</ul>
+		
+		<li>types of intents:
+			<ul>
+				<li><strong>explicit</strong>: Names a particular activity to launch.  ("run <code>Activity2</code>")
+				<li><strong>implicit</strong>: Describes task to perform; one of many apps could potentially handle it.  ("launch web browser")
+			</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Creating an Intent</h1>
+	
+	<ul>
+		<li>To launch another activity (usually in response to an event), create an <code class="androidapi" data-class="android.content.Intent">Intent</code> object and call <code>startActivity</code> with it:
+		
+		<pre><code class="java">
+val intent:Intent = new Intent(this, <var>ActivityName::java</var>.class)
+startActivity(intent)
+</code></pre>
+	
+		<li>If you need to pass any parameters or data to the second activity, call <code>putExtra</code> on the intent.
+		
+			<ul>
+				<li>It stores "extra" data as key/value pairs, not unlike a <code>Map</code>.
+			</ul>
+			
+		<pre><code class="java">
+val intent:Intent = new Intent(this, <var>ActivityName::java</var>.class)
+intent.putExtra("<var>name</var>", <var>value</var>)
+intent.putExtra("<var>name</var>", <var>value</var>)
+startActivity(intent)
+</code></pre>
+	</ul>
+</section>
+
+<section>
+	<h1>Extracting extra data</h1>
+	
+	<ul>
+		<li>In the second activity that was invoked, you can grab any extra data that was passed to it by the calling activity.
+			<ul>
+				<li>Access the <code>Intent</code> that spawned you by calling <code>getIntent</code>.
+				<li>The <code>Intent</code> has methods like <code>getIntExtra</code>, <code>getStringExtra</code>, etc. to extract data that was stored inside the intent.
+			</ul>
+	</ul>
+
+	<pre><code class="java">
+class SecondActivity : Activity {
+	...
+	Override fun onCreate(savedState : Bundle) {
+		super.onCreate(savedState)
+		setContentView(R.layout.activity_second)
+		
+		// extract "extra" data from the intent that loaded me
+		<em>val intent:Intent = getIntent()</em>
+		<em>val extra:String = intent.getStringExtra("<var>name</var>")</em>
+		...
+	}
+}
+</code></pre>
+</section>
+
+<section>
+	<h1>
+		Intent methods
+		(<a class="popup" href="javascript:if(confirm(%27https://developer.android.com/reference/android/content/Intent.html  \n\nThis file was not retrieved by Teleport Pro, because it is addressed using an unsupported protocol (e.g., gopher).  \n\nDo you want to open it from the server?%27))window.location=%27https://developer.android.com/reference/android/content/Intent.html%27" tppabs="https://developer.android.com/reference/android/content/Intent.html">list</a>)
+	</h1>
+	
+	<table class="methodtable">
+		<tr>
+			<th>Method</th>
+			<th>Description</th>
+		</tr>
+		
+		<tr>
+			<td style="width: 50%; font-size: 0.5em"><code>getBooleanArrayExtra("<var>name</var>")</code>, <code>getBooleanExtra("<var>name</var>")</code>, <code>getByteArrayExtra("<var>name</var>")</code>, <code>getByteExtra("<var>name</var>")</code>, <code>getCharArrayExtra("<var>name</var>")</code>, <code>getCharExtra("<var>name</var>")</code>, <code>getDoubleArrayExtra("<var>name</var>")</code>, <code>getDoubleExtra("<var>name</var>")</code>, <code> getFloatArrayExtra("<var>name</var>")</code>, <code>getFloatExtra("<var>name</var>")</code>, <code>getIntArrayExtra("<var>name</var>")</code>, <code>getIntExtra("<var>name</var>")</code>, <code>getIntegerArrayListExtra("<var>name</var>")</code>, <code>getLongArrayExtra("<var>name</var>")</code>, <code>getLongExtra("<var>name</var>")</code>, <code>getParcelableArrayExtra("<var>name</var>")</code>, <code>getParcelableExtra("<var>name</var>")</code>, <code>getSerializableExtra("<var>name</var>")</code>, <code>getStringArrayExtra("<var>name</var>")</code>, <code>getStringArrayListExtra("<var>name</var>")</code>, <code>getStringExtra("<var>name</var>")</code></td>
+			<td>return extra data of given type that is associated with the given key name</td>
+		</tr>
+		
+		<tr>
+			<td><code>getData()</code></td>
+			<td>returns URI of associated data</td>
+		</tr>
+		
+		<tr>
+			<td><code>hasExtra("<var>name</var>")</code></td>
+			<td><code>true</code> if extra data exists with given key name</td>
+		</tr>
+		
+		<tr>
+			<td><code>putExtra("<var>name</var>", <var>value</var>);</code></td>
+			<td>adds extra data with given key name</td>
+		</tr>
+		
+		<tr>
+			<td><code>putExtras(<var>bundle</var>);</code></td>
+			<td>adds all key/value pairs from the given bundle/intent as extra data</td>
+		</tr>
+		
+		<tr>
+			<td><code>removeExtra("<var>name</var>");</code></td>
+			<td>delete the given extra data</td>
+		</tr>
+		
+		<tr>
+			<td><code>replaceExtras(<var>bundle</var>);</code></td>
+			<td>wipe out all extra data and replace it w/ data from given bundle/intent</td>
+		</tr>
+		
+		<tr>
+			<td><code>setData(<var>uri</var>);</code></td>
+			<td>sets URI of associated data</td>
+		</tr>
+		
+		<tr>
+			<td><code>setFlags(<var>flags</var>);</code></td>
+			<td>various flags and settings</td>
+		</tr>
+	</table>
+</section>
+
+<section>
+	<h1>Waiting for a result - (Deprecated)</h1>
+	
+	<ul>
+		<li>If calling activity wants to wait for a result from called activity:
+			<ul>
+				<li>Call <strong><code>startActivityForResult</code></strong> rather than <code>startActivity</code>.
+					<ul>
+						<li><code>startActivityForResult</code> requires you to pass a unique ID number to represent the action being performed.
+						<li>By convention, you declare a final <code>int</code> constant with a value of your choice.
+						<li>The call to <code>startActivityForResult</code> will not wait; it will return immediately.
+					</ul>
+				
+				<li>Write an <strong><code>onActivityResult</code></strong> method that will be called when the second activity is done.
+					<ul>
+						<li>Check for your unique ID as was passed to <code>startActivityForResult</code>.
+						<li>If you see your unique ID, you can ask the intent for any extra data.
+					</ul>
+				
+				<li><strong>Modify the called activity</strong> to send a result back.
+					<ul>
+						<li>Use its <code>setResult</code> and <code>finish</code> methods to end the called activity.
+					</ul>
+			</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Sending back a result</h1>
+	
+	<ul>
+		<li>In the second activity that was invoked, send data back:
+			<ul>
+				<li>Need to create an <code>Intent</code> to go back.
+				<li>Store any extra data in that intent; call <code>setResult</code> and <code>finish</code>.
+			</ul>
+	</ul>
+	
+	<pre><code class="java">
+class SecondActivity : Activity {
+	...
+	fun myOnClick(view : View) {
+		// close this activity and send two results back
+		val intent : Intent = Intent()
+		intent.putExtra("<var>name1</var>", <var>value1</var>)
+		intent.putExtra("<var>name2</var>", <var>value2</var>)
+		setResult(RESULT_OK, intent)
+		finish()   // stops/closes the current activity
+	}
+}
+</code></pre>
+</section>
+
+<section>
+	<h1>Grabbing the result</h1>
+	
+	<pre><code class="java">
+class FirstActivity : Activity {
+	const val REQ_CODE = 123;   // MUST be 0-65535
+
+	fun myOnClick(view : View) {
+		val intent : Intent = Intent(this, SecondActivity.class)
+		startActivityForResult(intent, REQ_CODE)
+	}
+
+	Override fun onActivityResult(requestCode : Int,
+			resultCode : Int, intent : Intent) {
+		super.onActivityResult(requestCode, resultCode, intent)
+		if (requestCode == REQ_CODE) {
+			// came back from SecondActivity
+			val data = intent.getStringExtra("name")
+			Toast.makeText(this, "Got back: " + data,
+					Toast.LENGTH_SHORT).show()
+		}
+	}
+}
+</code></pre>
+</section>
+
+<!--
+Added new page, due to update in API
+-->
+<section>
+	<h1>Getting a result from an activity</h1>
+	<ul>
+		<li>As in <strong>Activity v1.2.0</strong> and <strong>Fragment v1.3.0</strong>, the new Activity Result APIs have been introduced.
+			<ul>
+				<li>The Activity Result APIs provide components for registering for a result, launching the result, and handling the result once it is dispatched by the system.
+			</ul>
+		<li>So there is no need of using <strong>startActivityForResult</strong> and <strong>onActivityResult</strong> anymore.
+		<li>First, dont forget to add <strong>Gradle Dependancy</strong>
+	
+		<pre><code class="java">
+implementation "androidx.activity:activity:1.2.0"
+implementation "androidx.fragment:fragment:1.3.0"
+
+		</code>	</pre>		
+	</ul>
+</section>
+
+<section>
+	<h1>How to do it??</h1>
+	<ul>
+		<li>First - We need to create the call back, which will be called on getting result - AKA registering Activity, on Call Back
+		<pre><code class="java">
+val <var>startForResult</var> = registerForActivityResult(<var>StartActivityForResult()</var>) 
+{ 
+	result: ActivityResult ->
+    if (result.resultCode == Activity.RESULT_OK) {
+        val intent = result.data
+        // Handle the Intent
+    }
+}
+</code></pre>
+	<li><strong>RegisterForActivityResult</strong> takes the following parameter
+		<ol>
+			<li>ActivityResultContracts - A contract specifying that an activity can be called with an input of type I and produce an output of type O.			
+		</ol>
+	</ul>
+</section>
+
+<section>
+	<h1>Registering Activity for Result</h1>
+	<ul>
+		<li>From now, startActivityForResult() has been deprecated so use new method instead of that.
+		<pre><code class="java">
+startButton.setOnClickListener {
+	// Use the Kotlin extension in activity-ktx
+	// passing it the Intent you want to start
+	startForResult.launch(Intent(this, ResultProducingActivity::class.java))
+}
+		</code></pre>
+	</ul>
+</section>
+
+
+<!--section>
+	<h1>
+		Lib: start/finish activities
+		<img class="stanfordliblogo" src="images/stanford-logo-icon.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/stanford-logo-icon.png" alt="figure" />
+	</h1>
+	
+	<table class="methodtable">
+		<tr>
+			<th>Method</th>
+			<th>Description</th>
+		</tr>
+		
+		<tr>
+			<td><code>startActivity(<var>Class</var>, <br />
+&nbsp; "<var>paramName1</var>", <var>value1</var>, ..., <br />
+&nbsp; "<var>paramNameN</var>", <var>valueN</var>);</code></td>
+			<td>start another activity, passing it the given parameters</td>
+		</tr>
+		
+		<tr>
+			<td><code>startActivityForResult( <br />
+&nbsp; <var>Class</var>, <var>resultCode</var>, <br />
+&nbsp; "<var>paramName1</var>", <var>value1</var>, ..., <br />
+&nbsp; "<var>paramNameN</var>", <var>valueN</var>);</code></td>
+			<td>start an activity that will return a result using the given code</td>
+		</tr>
+		
+		<tr>
+			<td><code style="white-space: nowrap; margin-right: 1em;">finish("<var>paramName1</var>", <var>value1</var>, ...);</code></td>
+			<td>end the current activity and pass back results</td>
+		</tr>
+		
+		<tr>
+			<td><code>finish(<var>resultCode</var>, <br />
+&nbsp; "<var>paramName1</var>", <var>value1</var>, ...);</code></td>
+			<td>end current activity with given code and results</td>
+		</tr>
+	</table>
+	
+	<pre><code class="java">
+// more easily launch another activity (examples)
+startActivity(MyActivity2.class,
+    "userName", myUserName, "id", userID);
+...
+finish("result", myResult, "details", myDetails);
+</code></pre>
+</section>
+
+<section>
+	<h1>
+		Lib: get activity params
+		<img class="stanfordliblogo" src="images/stanford-logo-icon.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/stanford-logo-icon.png" alt="figure" />
+	</h1>
+	
+	<table class="methodtable">
+		<tr>
+			<th>Method</th>
+			<th>Description</th>
+		</tr>
+		
+		<tr>
+			<td><code>getExtra("<var>name</var>")</code></td>
+			<td>get parameter of any type</td>
+		</tr>
+		
+		<tr>
+			<td><code>getBooleanExtra("<var>name</var>")</code></td>
+			<td>get boolean parameter</td>
+		</tr>
+		
+		<tr>
+			<td><code>getDoubleExtra("<var>name</var>")</code></td>
+			<td>get double parameter</td>
+		</tr>
+		
+		<tr>
+			<td><code>getIntExtra("<var>name</var>")</code></td>
+			<td>get integer parameter</td>
+		</tr>
+		
+		<tr>
+			<td><code>getLongExtra("<var>name</var>")</code></td>
+			<td>get long integer parameter</td>
+		</tr>
+		
+		<tr>
+			<td><code>getStringExtra("<var>name</var>")</code></td>
+			<td>get string parameter</td>
+		</tr>
+	</table>
+	
+	<pre><code class="java">
+// extracting parameters when an activity is called
+// (equiv. to getIntent().getStringExtra)
+String email = getStringExtra("emailAddress");
+int age = getIntExtra("age");
+
+// each method also has a default-value version
+int age = getIntExtra("age", <em>40</em>);
+</code></pre>
+</section-->
+
+<section>
+	<h1>
+		Implicit Intent
+		(<a class="popup" href="javascript:if(confirm(%27http://developer.android.com/training/basics/intents/sending.html  \n\nThis file was not retrieved by Teleport Pro, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://developer.android.com/training/basics/intents/sending.html%27" tppabs="http://developer.android.com/training/basics/intents/sending.html">link</a>)
+	</h1>
+	
+	<ul>
+		<li><strong>implicit intent</strong>: One that launches another app, without naming that specific app, to handle a given type of request or action.
+			<ul>
+				<li>examples: invoke default browser;  load music player to play a song
+			</ul>
+	</ul>
+	
+	<pre><code class="java">
+// make a phone call
+val number : Uri = Uri.parse("tel:5551234")
+val callIntent : Intent = new Intent(Intent.ACTION_DIAL, number)
+
+// go to a web page in the default browser
+val webpage : Uri = Uri.parse("http://www.stanford.edu/")
+val webIntent : Intent = new Intent(Intent.ACTION_VIEW, webpage)
+
+// open a map pointing at a given latitude/longitude (z=zoom)
+val location : Uri = Uri.parse("geo:37.422219,-122.08364?z=14")
+val mapIntent : Intent = new Intent(Intent.ACTION_VIEW, location)
+</code></pre>
+</section>
+	
+<section>
+	<h1>
+		Implicit Intent - (Continued)
+		(<a class="popup" href="javascript:if(confirm(%27http://developer.android.com/training/basics/intents/sending.html  \n\nThis file was not retrieved by Teleport Pro, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://developer.android.com/training/basics/intents/sending.html%27" tppabs="http://developer.android.com/training/basics/intents/sending.html">link</a>)
+	</h1>
+	
+	<ul>
+
+		<li>Android contains a permission system and predefined permissions for certain tasks. </li>
+
+		<li>The permission concept has changed since API 23. Before API level 23 the user was asked during installation, after API level the user is asked during runtime.
+		<ul>
+			<li>example: lets create try to invoke camera</li>
+		</ul>
+
+	</ul>
+	
+	<pre><code class="java">
+		// code to open camera
+		val intent : Intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+		
+		// now here we need to call explicit permission code (explained on next slide)
+		startActivity(intent)
+		
+	</code></pre>
+
+</section>
+
+<section>
+	<h1>
+		Explicit Permission
+		(<a class="popup" href="javascript:if(confirm(%27https://developer.android.com/training/permissions/requesting  \n\nThis file was not retrieved by Teleport Pro, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27https://developer.android.com/training/permissions/requesting%27" tppabs="https://developer.android.com/training/permissions/requesting">link</a>)
+	</h1>
+	
+	<ul>	
+		<li class="subbullet">
+		<ul>		
+			<li class="subbullet">
+	<pre><code class="java">
+//Code to check if permissions granted
+if (ContextCompat.checkSelfPermission(
+	CONTEXT, Manifest.permission.REQUESTED_PERMISSION) ==
+	PackageManager.PERMISSION_GRANTED) {
+		//Do Something 
+}
+else{
+	//request Permission Here
+	requestPermissionLauncher.launch(
+		Manifest.permission.REQUESTED_PERMISSION);
+		
+	//OR			
+	requestPermissions(CONTEXT,
+	arrayOf( Manifest.permission.REQUESTED_PERMISSION ),
+	REQUEST_CODE);
+}</code></pre>
+		</ul>
+	</ul>
+	<ul>		
+		<li>Where
+		<ul>
+			<li class="subbullet">
+			<ul>
+			<li>CONTEXT : is the reference of calling activity (i-e "this" for same activity)
+			<li>REQUESTED_PERMISSION : is the name of permission you need (i-e "Camera" for camera access)
+			<li>REQUEST_CODE : is the code, it can be anything to uniquely identify the permission
+			</ul>
+		</ul>
+	</ul>
+
+</section>
+
+<section>
+	<h1>Activity stack and Back button</h1>
+	
+	<ul>
+		<li><strong>activity stack</strong>: Set of activities visited most recently.
+			<ul>
+				<li>current activity is on "top" of stack; prior activity is below that;  etc.
+				<li>When user presses Back/Up button or <code>finish()</code> is called, the app pops the activity stack and goes back to the prior one.
+			</ul>
+	</ul>
+	
+	<div class="figure">
+		<img src="images/activity-stack.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/activity-stack.png" alt="figure" />
+	</div>
+</section>
+
+<section>
+	<h1>Parent activity in manifest</h1>
+	
+	<ul>
+		<li>You can set a "parent" activity for a given activity to go back to.
+		<li>To set a parent activity, declare it in <span class="filename">AndroidManifest.xml</span>:
+	</ul>
+	
+	<pre class="longcode"><code class="xml">
+&lt;manifest ...&gt;
+	&lt;application ...&gt;
+		&lt;activity android:name=&quot;.MainActivity&quot;
+				  android:label=&quot;@string/app_name&quot; &gt;
+			...
+		&lt;/activity&gt;
+		&lt;activity android:name=&quot;.SecondActivity&quot;
+				  android:label=&quot;@string/title_activity_second&quot;
+				  <em>android:parentActivityName=&quot;.MainActivity&quot;</em> &gt;
+			&lt;!-- meta is for backward compatibility w/ Android &lt; 4 --&gt;
+			&lt;meta-data android:name=&quot;android.support.PARENT_ACTIVITY&quot;
+				android:value=&quot;com.example.myusername.myapplication.MainActivity&quot; /&gt;
+		&lt;/activity&gt;
+	&lt;/application&gt;
+&lt;/manifest&gt;
+</code></pre>
+</section>
+
+<section>
+	<h1>Activities and Toolbar</h1>
+	
+	<ul>
+		<li><strong>toolbar</strong>: A top-level menu of actions in an activity.
+			<ul>
+				<li>replaces "menu" and "action bar" in past versions of Android
+				<li>identifies current activity/app to user
+				<li>make common actions prominent and available
+				<li>make less common actions available through a drop-down menu
+			</ul>
+		<li>If your activity has a parent, its toolbar will have a "<strong>back</strong>" button or "up" button to return to the parent activity.
+			<ul>
+				<li>or call:  <code>getActionBar().setDisplayHomeAsUpEnabled(true);</code>
+			</ul>
+	</ul>
+
+	<div class="figure">
+		<img src="images/action-bar-back.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/action-bar-back.png" alt="figure" />
+	</div>
+</section>
+
+<section>
+	<h1>More about activity stack</h1>
+	
+	<ul>
+		<li>Navigating up to parent activity manually:
+			
+			<pre><code class="java">
+NavUtils.navigateUpFromSameTask(this);
+</code></pre>
+
+		<li>Smashing and recreating your own activity stack:
+		
+			<pre><code class="java">
+val upIntent : Intent = NavUtils.getParentActivityIntent(this)
+if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
+	// This activity is NOT part of this app's task
+	TaskStackBuilder.create(this)
+		// Add this activity's parents to back stack
+		.addNextIntentWithParentStack(upIntent)
+
+		// Navigate up to the closest parent
+		.startActivities()
+}
+</code></pre>
+	</ul>
+</section>
+
+
+<!-- END SLIDES AREA -->
+			</div>
+		</div>
+
+		<script src="highlightjs/highlight.pack.js" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/highlightjs/highlight.pack.js"></script>
+		<script src="cs193a-slides.js" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/cs193a-slides.js"></script>
+		<script src="reveal/js/reveal.js" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/reveal/js/reveal.js"></script>
+		<script>
+			initializeSlides();
+		</script>
+	</body>
+</html>

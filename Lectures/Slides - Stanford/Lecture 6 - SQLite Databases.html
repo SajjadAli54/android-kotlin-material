@@ -1,0 +1,256 @@
+<html>
+	<head>
+		<title>CS 193A - SQLite Database</title>
+		<link rel="stylesheet" href="highlightjs/styles/default.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/highlightjs/styles/default.css">
+		<link rel="stylesheet" href="reveal/css/reveal.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/reveal/css/reveal.css">
+		<link rel="stylesheet" href="reveal/css/theme/white.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/reveal/css/theme/white.css">
+		<link rel="stylesheet" href="cs193a-slides.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/cs193a-slides.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+<!-- BEGIN SLIDES AREA -->
+
+<section class="titleslide">
+	<h1>CS 193A</h1>
+
+	<p>SQLite Database</p>
+</section>
+
+<section>
+	<h1>Relational Database</h1>
+
+	<ul>
+		<li>Data structured into associated <b>tables</b>:
+			<ul>
+				<li>think of an Excel worksheet as a table
+				<li>a database is a collection of one or more tables, along with support for efficient operations
+				<ul>
+					<li>common operations: "CRUD" (<u>c</u>reate, <u>r</u>ead, <u>u</u>pdate, <u>d</u>elete); fast search
+				</ul>
+				<li>a table <b>row</b> corresponds to a unit of data called a record;
+				<li>a <b>column</b> corresponds to an attribute of that record
+			</ul>
+	</ul>
+	
+	<div class="figure">
+		<img src="https://i.ibb.co/DG1LxdF/db.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/fragment-1-cropped.png" alt="figure" />
+	</div>
+</section>
+
+<section>
+	<h1>Where is the data?</h1>
+
+	<ul>
+		<li>A database can be located in many places:
+			<ul>
+				<li>within your Android device (a "local database")
+				<li>on a remote web server
+				<li>spread throughout many remote servers ("in the cloud")				
+			</ul>
+		<li>Today we will learn to create and use local databases.
+	</ul>
+	
+	<div class="figure">
+		<img src="https://i.ibb.co/TcXzLQ3/db2.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/fragment-1-cropped.png" alt="figure" />
+	</div>
+</section>
+
+<section>
+	<h1>Why use a database?</h1>
+
+	<ul>
+		<li><b>powerful:</b> can search, filter, combine data from many sources
+		<li><b>fast:</b> can search/filter a database very quickly compared to a file
+		<li><b>big:</b> scale well up to very large data sizes
+		<li><b>safe:</b> built-in mechanisms for failure recovery (transactions)
+		<li><b>multi-user:</b> concurrency features let many users view/edit data at same time
+		<li><b>abstract:</b> layer of abstraction between stored data and app(s)
+		<li><b>common syntax:</b> database programs use same SQL commands
+	</ul>
+
+</section>
+
+<section>
+	<h1>Android SQLiteDatabase (<a href="https://developer.android.com/training/data-storage/sqlite">link</a>)</h1>
+
+	<ul>
+		<li class="subbullet"><ul>
+			<li class="subbullet"><pre><code class="java">val db = openOrCreateDatabase("name", MODE_PRIVATE, null)
+db.execSQL("SQL query")</code></pre>
+		</ul>
+	</ul>
+	<hr />
+	<ul>
+		<li>The openOrCreateDatabase method either creates a new empty database with that name or opens an existing one
+		<ul>
+			<li>once opened, you can use methods to execute SQL commands:
+			<ul>
+				<li>rawQuery - if your query <b>returns</b> results (e.g. SELECT)
+				<li>execSQL - if your query does not return results (e.g. INSERT, DELETE)
+			</ul>
+			<li>If query has invalid SQL, throws an SqliteException
+			<li>If query has invalid SQL, throws an SqliteExceptionSQLite databases get saved to /data/data/packageName/databases/
+			<ul>
+				<li class="subbullet">(but you should never need to manipulate them as files directly)
+			</ul>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>SQLiteDatabase methods (<a href="https://developer.android.com/reference/android/database/sqlite/SQLiteDatabase">link</a>)</h1>
+	<div class="figure">
+		<img src="https://i.ibb.co/VMRWHjP/db3.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/fragment-1-cropped.png" alt="figure" />
+	</div>
+	
+</section>
+
+<section>
+	<h1>Concept of a Cursor</h1>
+	
+	<ul>
+		<li>The Android SQLite API returns an object called a Cursor that allows you to iterate through the results of a SELECT query.
+			<ul>
+				<li>Similar to the concept of an iterator				
+			</ul>
+		
+		<li>Like a pointer positioned to a given row from the set of results.
+			<ul>
+				<li>You can move the cursor forward to the next result row.
+				<li>You can ask the cursor for values of columns of its "current" row.
+			</ul>
+	</ul>
+	
+	<div class="figure">
+		<img src="https://i.ibb.co/XxVNpRP/db4.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/fragment-1-cropped.png" alt="figure" width="60%" />
+	</div>
+</section>
+
+<section>
+	<h1>Cursor example (<a href="https://developer.android.com/reference/android/database/Cursor">link</a>)</h1>
+	
+	<ul>
+		<li class="subbullet">
+			<ul>
+				<li class="subbullet"><pre><code class="java">// Cursor iterates through row results one at a time
+val cr = db.rawQuery("SELECT id, email FROM students", null)
+if (cr.moveToFirst()) {
+	do 
+	{
+		var id = cr.getInt(cr.getColumnIndex("id"))
+		var email = cr.getString(cr.getColumnIndex("email"))
+		...
+	}while (cr.moveToNext())
+	cr.close()
+}</code></pre>
+				
+			</ul>
+	</ul>
+	<hr />
+	
+	<div class="figure">
+		<img width="50%" src="https://i.ibb.co/9v1yR12/db5.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/fragments-outline.png" alt="figure" />
+	</div>
+</section>
+
+<section>
+	<h1>Cursor methods (<a href="https://developer.android.com/reference/android/database/Cursor">link</a>)</h1>
+	
+	<div class="figure">
+		<img width="100%" src="https://i.ibb.co/Phjj21h/db6.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/android-studio-new-fragment.png" alt="figure" />
+	</div>
+</section>
+
+<section>
+	<h1>Importing a .sql file</h1>
+	
+	<ul>
+		<li>A .sql file contains a sequence of SQL commands
+		<ul>
+			<li>Common format for exporting an entire database and its contents
+			<li>Used to save a backup or restore db to another server.
+		</ul>
+		<li>To import a .sql file into an Android app:
+		<ul>
+			<li>Put the .sql file into your app's res/raw folder
+			<li>Open it with a Scanner
+			<li>Read lines until you find a semicolon
+			<li>Run the string you read as a query using execSQL
+			<li>Repeat
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Import .sql example</h1>
+	
+	<ul>
+		<li class="subbullet">
+		<ul>
+			<pre><code class="java">// read example.sql into database named "example"
+val db : SQLiteDatabase = context.openOrCreateDatabase("example")
+val scan : Scanner = Scanner(getResources().openRawResource(R.raw.example))
+var query : String = "";
+while (scan.hasNextLine()) { // build and execute queries
+	query += scan.nextLine() + "\n";
+	if (query.trim().endsWith(";")) {
+		db.execSQL(query);
+		query = "";
+	}
+}</code></pre>
+		</ul>
+	</ul>	
+</section>
+
+<section>
+	<h1>ContentValues (<a href="https://developer.android.com/reference/android/content/ContentValues">link</a>)</h1>
+	
+	<ul>
+		<li>ContentValues can be optionally used as a level of abstraction for statements like INSERT, UPDATE, REPLACE
+		<ul>
+			<li>meant to provide cleaner Kotlin syntax rather than raw SQL syntax
+		</ul>
+	</ul>
+	<hr />
+	<ul>
+		<li class="subbullet">
+		<ul>
+			<li class="subbullet"><pre><code class="java">// alternative syntax using insert method
+val name = "Lewis"
+val email = "lewis@fox.com"
+<s>db.execSQL("INSERT INTO students (name, email) "+ "VALUES ('" + name + "', '" + email + "')")</s>
+
+// use ContentValues to store values to put in row
+val cvalues : ContentValues = ContentValues()
+cvalues.put("name", name)
+cvalues.put("email", email)
+db.insert("students", null, cvalues)</code></pre>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>SQLiteOpenHelper</h1>
+	
+	<ul>
+		<li>A helper class to manage database creation and version management.
+		<li>This class makes it easy for <b>ContentProvider</b> implementations to defer opening and upgrading the database until first use, to avoid blocking application startup with long-running database upgrades
+	</ul>
+	<div class="figure">
+		<img width="40%" src="https://www.tutorialkart.com/wp-content/uploads/2017/11/android-sqllite-example.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/fragments-outline.png" alt="figure" />
+	</div>
+</section>
+<!-- END SLIDES AREA -->
+			</div>
+		</div>
+
+		<script src="highlightjs/highlight.pack.js" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/highlightjs/highlight.pack.js"></script>
+		<script src="cs193a-slides.js" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/cs193a-slides.js"></script>
+		<script src="reveal/js/reveal.js" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/reveal/js/reveal.js"></script>
+		<script>
+			initializeSlides();
+		</script>
+	</body>
+</html>

@@ -1,0 +1,207 @@
+<html>
+	<head>
+		<title>CS 193A - Filing and Adapters</title>
+		<link rel="stylesheet" href="highlightjs/styles/default.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/highlightjs/styles/default.css">
+		<link rel="stylesheet" href="reveal/css/reveal.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/reveal/css/reveal.css">
+		<link rel="stylesheet" href="reveal/css/theme/white.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/reveal/css/theme/white.css">
+		<link rel="stylesheet" href="cs193a-slides.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/cs193a-slides.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+<!-- BEGIN SLIDES AREA -->
+
+<section class="titleslide">
+	<h1>CS 193A</h1>
+
+	<p>Filing and Adapters</p>
+</section>
+
+<section>
+	<h1>Data and file storage overview</h1>
+
+	<ul>
+		<li>Android uses a file system that's similar to disk-based file systems on other platforms. The system provides several options for you to save your app data::
+			<ul>
+				<li><b>App-specific storage:</b> Store files that are meant for your app's use only, either in dedicated directories within an internal storage volume or different dedicated directories within external storage
+				<li><b>Shared storage:</b> Store files that your app intends to share with other apps, including media, documents, and other files.
+				<li><b>Preferences:</b> Store private, primitive data in key-value pairs.
+				<li><b>Databases:</b> Store structured data in a private database using the Room persistence library.
+			</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Situation-specific folders</h1>
+	
+	<table class="methodtable">
+		<tr>
+			<th>Type of content	</th>
+			<th>Method</th>
+			<th>Permissions Needed</th>
+		</tr>
+		
+		<tr>
+			<td>App-specific files</td> 	
+			<td style="width: 50%; font-size: 0.8em">From internal storage <br /><code>getFilesDir()</code>,or <code>getCacheDir()</code> <br /><br />From external storage<br /> <code>getExternalFilesDir() </code>, <code>getExternalCacheDir()</code></td>
+			<td style="width: 50%; font-size: 0.8em">Never needed for internal storage <br/> Not needed for external storage when your app is used on devices that run Android 4.4 (API level 19) or higher	</td>
+		</tr>
+		
+		<tr>
+			<td>Media</td>
+			<td><code>MediaStore API</code></td>
+			<td>READ_EXTERNAL_STORAGE</td>
+		</tr>
+		
+		<tr>
+			<td>Documents and other files</td>
+			<td><code>Storage Access Framework</code></td>
+			<td>None</td>
+		</tr>		
+	</table>
+</section>
+
+<section>
+	<h1>Access app-specific files</h1>
+	
+	<ul>
+		<li>Internal storage directories:
+			<ul>
+				<li>These directories include both a dedicated location for storing persistent files, and another location for storing cache data				
+				<li>The system prevents other apps from accessing these locations, and on Android 10 (API level 29) and higher, these locations are encrypted
+			</ul>
+		<li>External storage directories
+			<ul>
+				<li>These directories include both a dedicated location for storing persistent files, and another location for storing cache data				
+				<li>Although it's possible for another app to access these directories if that app has the proper permissions, the files stored in these directories are meant for use only by your app
+			</ul>
+	</ul>	
+</section>
+
+<section>
+	<h1>Access persistent files</h1>
+	
+	<ul>
+		<li>Your app's ordinary, persistent files reside in a directory that you can access using the  <code>filesDir</code> property of a context object.
+			<ul>
+				<li class="subbullet"><pre><code class="java">val file = File(context.filesDir, filename)</code></pre>
+			</ul>
+		<li>Store a file using a stream
+		<li>As an alternative to using the <code>File API</code>, you can call <code>openFileOutput()</code> to get a <code>FileOutputStream</code> that writes to a file within the <code>filesDir</code> directory.
+			<ul>
+				<li class="subbullet"><pre><code class="java">val filename = "myfile"
+val fileContents = "Hello world!"
+context.openFileOutput(filename, Context.MODE_PRIVATE).use {
+        it.write(fileContents.toByteArray())
+}</code></pre>
+			</ul>
+	</ul>
+	
+</section>
+
+<section>
+	<h1>Access a file using a stream</h1>
+	
+	<ul>
+		<li>To read a file as a stream, use <code>openFileInput()</code>:
+			<ul>
+				<li class="subbullet"><pre><code class="java">context.openFileInput(filename).bufferedReader().useLines { lines ->
+    lines.fold("") { some, text ->
+        "$some\n$text"
+    }
+}</code></pre>
+			</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>View list of files</h1>
+	
+	<ul>
+		<li>You can get an array containing the names of all files within the <code><strong>filesDir</code></strong> directory by calling <code><strong>fileList()</code></strong>, as shown in the following code snippet
+			<ul>
+				<li class="subbullet"><pre><code class="java">var files: Array<String> = context.fileList()</code></pre>
+			</ul>
+	</ul>	
+</section>
+
+<section>
+	<h1>Access from external storage</h1>
+	
+	<ul>
+		<li>Access persistent files
+			<ul>
+				<li>To access app-specific files from external storage, call <strong>getExternalFilesDir().</strong>
+				<li>To help maintain your app's performance, don't open and close the same file multiple times
+				<li>The following code snippet demonstrates how to call <strong>getExternalFilesDir():</strong>
+				<li class="subbullet"><pre><code class="java">val appSpecificExternalDir = File(context.getExternalFilesDir(null), filename)</code></pre>
+			</ul>
+	</ul>	
+</section>
+<section class="titleslide">
+	<h1>CS 193A</h1>
+
+	<p>Adapters</p>
+</section>
+
+<section>
+	<h1>Adapters</h1>
+	
+	<ul>
+		<li>An Adapter object acts as a bridge between an AdapterView and the data for that view.
+		<li>Android Adapters basically provides access to the data items
+		
+	</ul>	
+	<div class="figure">
+		<img src="https://i.imgur.com/mk82Jd2.jpeg" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/activity-stack.png" alt="figure" />
+	</div>
+</section>
+
+<section>
+	<h1>Row View Recycling</h1>
+	
+	<ul>
+		<li>When using an adapter and a ListView, we need to make sure to understand how view recycling works
+			<ul>
+				<li>When your ListView is connected to an adapter, the adapter will instantiate rows until the ListView has been fully populated
+				<li>As user scrolls through the list, items that leave the screen are kept in memory for later use
+				<li>In this way, even for a list of 1000 items, only ~7 item view rows are ever instantiated or held in memory
+			<ul>
+	</ul>	
+	<div class="figure" align="center">
+		<img src="https://i.imgur.com/SZ8iKuu.jpeg" width="40%" height="250" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/activity-stack.png" alt="figure" />
+	</div>
+</section>
+
+<section>
+	<h1>Using a Basic ArrayAdapter</h1>
+	
+	<ul>
+		<li>To use a basic ArrayAdapter, you just need to initialize the adapter and attach the adapter to the ListView.
+			<ul>
+				<li class="subbullet"><pre><code class="java">val itemsAdapter : ArrayAdapter<String> = 
+    ArrayAdapter(this, android.R.layout.simple_list_item_1, items)</code></pre>
+			</ul>
+		<li>Now, we just need to connect this adapter to a ListView to be populated:
+
+		<ul>
+				<li class="subbullet"><pre><code class="java">val listView : ListView = findViewById(R.id.listView)
+listView.adapter = itemsAdapter</code></pre>
+		</ul>
+	</ul>	
+	
+</section>
+
+<!-- END SLIDES AREA -->
+			</div>
+		</div>
+
+		<script src="highlightjs/highlight.pack.js" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/highlightjs/highlight.pack.js"></script>
+		<script src="cs193a-slides.js" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/cs193a-slides.js"></script>
+		<script src="reveal/js/reveal.js" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/reveal/js/reveal.js"></script>
+		<script>
+			initializeSlides();
+		</script>
+	</body>
+</html>

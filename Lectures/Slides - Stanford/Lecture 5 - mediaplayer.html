@@ -1,0 +1,283 @@
+<html>
+	<head>
+		<title>Lecture - MediaPlayer</title>
+		<link rel="stylesheet" href="highlightjs/styles/default.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/highlightjs/styles/default.css">
+		<link rel="stylesheet" href="reveal/css/reveal.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/reveal/css/reveal.css">
+		<link rel="stylesheet" href="reveal/css/theme/white.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/reveal/css/theme/white.css">
+		<link rel="stylesheet" href="cs193a-slides.css" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/cs193a-slides.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+<!-- BEGIN SLIDES AREA -->
+
+<section class="titleslide">
+	<h1>CSC - 455</h1>
+
+	<p>Playing audio with MediaPlayer</p>
+</section>
+<section>
+	<h1>The basics</h1>
+	<ul>
+		<li class="subbullet">The following classes are used to play sound and video in the Android framework
+		<ul>
+			<li><em><b>MediaPlayer</b></em>
+			<li class="subbullet">This class is the primary API for playing sound and video
+			<li><em><b>AudioManager</b></em>
+			<li class="subbullet">This class manages audio sources and audio output on a device
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Manifest declarations</h1>
+	<ul>
+		<li class="subbullet">Make sure your manifest has the appropriate declarations to allow use of related features
+		<ul>
+			<li><b>Internet Permission : </b>If you are using MediaPlayer to stream network-based content, your application must request network access.
+			<li class="subbullet"><pre><code class="xml">&lt;uses-permission android:name="android.permission.INTERNET" /&gt;</code></pre>
+			<li><b>Wake Lock Permission : </b>If your player application needs to keep the screen from dimming or the processor from sleeping
+			<li class="subbullet"><pre><code class="xml">&lt;uses-permission android:name="android.permission.WAKE_LOCK" /&gt;</code></pre>
+		</ul>
+	</ul>
+</section>
+<section>
+	<h1>Using MediaPlayer</h1>
+	<ul>
+		<li class="subbullet">One of the most important components of the media framework is the <code class="androidapi" data-class="android.media.MediaPlayer">MediaPlayer</code> class. It supports several different media sources such as:
+		<ul>
+			<li>Local resources (such as Raw folder)
+			<li>Internal URIs (such as one you might obtain from a Content Resolver)
+			<li>External URLs (streaming)
+		</ul>
+	</ul>
+</section>
+<section>
+	<h1>
+		Playing Audio - Resources
+		(<a class="popup" href="javascript:if(confirm(%27http://developer.android.com/guide/topics/media/mediaplayer.html  \n\nThis file was not retrieved by Teleport Pro, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://developer.android.com/guide/topics/media/mediaplayer.html%27" tppabs="http://developer.android.com/guide/topics/media/mediaplayer.html">link</a>)
+	</h1>
+	
+	<ul>
+		<li>Find sound files such as .WAV, .MP3
+		<li>put sound files in project folder <span class="filename">res/raw</span> (really <span class="filename">app/src/main/res/raw</span>)
+		<li>in Java code, refer to audio file as <code>R.raw.<var>filename</var></code>
+			<ul>
+				<li>(don't include the extension;  <code>R.raw.foo</code> for <span class="filename">foo.mp3</span>)
+				<li>use simple file names with only letters and numbers
+			</ul>
+	</ul>
+	
+	<ul>
+		<li>Load and play clips using Android's <code class="androidapi" data-class="android.media.MediaPlayer">MediaPlayer</code> class
+			<pre><code class="java">
+var mediaPlayer = MediaPlayer.create(context, R.raw.sound_file_1)
+mediaPlayer.start() // no need to call prepare(); create() does that for you
+</code></pre>
+		
+		<li>other methods: <code>stop</code>, <code>pause</code>, <code>isLooping</code>, <code>isPlaying</code>, <code>getCurrentPosition</code>, <code>release</code>, <code>seekTo</code>, <code>setDataSource</code>, <code>setLooping</code>
+	</ul>
+</section>
+
+<section>
+	<h1>Playing Audio - Internal URIs
+	(<a class="popup" href="javascript:if(confirm(%27https://developer.android.com/guide/topics/media/mediaplayer  \n\nThis file was not retrieved by Teleport Pro, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27https://developer.android.com/guide/topics/media/mediaplayer%27" tppabs="https://developer.android.com/guide/topics/media/mediaplayer">link</a>)
+	</h1>
+	<ul>
+		<li class="subbullet">
+		<ul>
+			<pre><code class="kotlin">
+val myUri: Uri = .... // initialize Uri here
+val mediaPlayer = MediaPlayer().apply {
+    setAudioAttributes(
+        AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .build()
+    )
+    setDataSource(applicationContext, myUri)
+    prepare()
+    start()
+}
+			</code></pre>
+		</ul>
+	</ul>
+</section>
+
+<section>
+	<h1>Playing Audio - Remote URL
+	(<a class="popup" href="javascript:if(confirm(%27https://developer.android.com/guide/topics/media/mediaplayer  \n\nThis file was not retrieved by Teleport Pro, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27https://developer.android.com/guide/topics/media/mediaplayer%27" tppabs="https://developer.android.com/guide/topics/media/mediaplayer">link</a>)
+	</h1>
+	<ul>
+		<li class="subbullet">
+		<ul>
+			<pre><code class="kotlin">
+val url = "http://........" // your URL here
+val mediaPlayer = MediaPlayer().apply {
+    setAudioAttributes(
+        AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .build()
+    )
+    setDataSource(url)
+    prepare() // might take long! (for buffering, etc)
+    start()
+}
+			</code></pre>
+		</ul>
+	</ul>
+</section>
+
+<!-- Second Slide Section -->
+<section class="titleslide">
+	<h1>CSC - 455</h1>
+
+	<p>Creating Context Menus</p>
+</section>
+
+<section>
+	<h1>
+		Type of Menus
+		(<a class="popup" href="javascript:if(confirm(%27https://developer.android.com/guide/topics/ui/menus  \n\nThis file was not retrieved by Teleport Pro, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27https://developer.android.com/guide/topics/ui/menus" tppabs="https://developer.android.com/guide/topics/ui/menus">link</a>)
+	</h1>
+	
+	<ul>
+		<li>Types of Menus
+		<ul>
+			<li>Options menu and app bar
+			<li>Context menu and contextual action mode
+			<li>Popup menu
+		</ul>
+	</ul>
+	
+	<ul>
+		<li>Options Menu - Define Menu in XML file
+		<ul>
+			<li>Android provides a standard XML format to define menu items. Instead of building a menu in your activity's code, you should define a menu and all its items in an XML menu resource. You can then inflate the menu resource (load it as a Menu object) in your activity or fragment
+			<li>To specify the options menu for an activity, override onCreateOptionsMenu() (fragments provide their own onCreateOptionsMenu() callback). </li>
+		</ul>
+			<pre><code class="kotlin">
+override fun onCreateOptionsMenu(menu : Menu) {
+    val inflater : MenuInflater = getMenuInflater()
+    inflater.inflate(R.menu.game_menu, menu)
+    return true
+}</code></pre>		
+	</ul>
+</section>
+
+<section>
+	<h1>
+		Creating Menu in XML File
+	</h1>
+	
+	<ul>
+		<li>To define the menu, create an XML file inside your project's res/menu/ directory and build the menu with the following elements:
+
+		<dl>
+			<dt><pre><code class="java">< menu ></code></pre></dt>
+			<dd>Defines a Menu, which is a container for menu items. A < menu > element must be the root node for the file and can hold one or more <item> and <group> elements.</dd>
+			
+			<dt><pre><code class="java">< item ></code></pre></dt>
+			<dd>Creates a MenuItem, which represents a single item in a menu. This element may contain a nested < menu > element in order to create a submenu</dd>
+		</dl>
+
+	</ul>
+	
+</section>
+
+<section>
+	<h1>XML - Sample Menu</h1>
+	<ul>
+		<li>This is sample code to create a menu
+		<ul>
+			<pre><code class="xml">
+&lt;xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/new_game"
+          android:icon="@drawable/ic_new_game"
+          android:title="@string/new_game"
+          android:showAsAction="ifRoom"/&gt;
+    &lt;item android:id="@+id/help"
+          android:icon="@drawable/ic_help"
+          android:title="@string/help" /&gt;
+&lt;/menu&gt;
+			</code></pre>
+		</ul>
+	</ul>
+</section>
+
+
+<!--section>
+	<h1>
+		Lib: SimpleMedia
+		<img class="stanfordliblogo" src="images/stanford-logo-icon.png" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/images/stanford-logo-icon.png" alt="figure" />
+	</h1>
+	
+	<table class="methodtable">
+		<tr>
+			<th>Method</th>
+			<th>Description</th>
+		</tr>
+		
+		<tr>
+			<td><code>play(<var>id</var>);</code></td>
+			<td>play/unpause sound with given ID</td>
+		</tr>
+		
+		<tr>
+			<td><code>loop(<var>id</var>);</code></td>
+			<td>repeatedly plays sound</td>
+		</tr>
+		
+		<tr>
+			<td><code>pause(<var>id</var>);</code></td>
+			<td>pause sound if playing</td>
+		</tr>
+		
+		<tr>
+			<td><code>stop(<var>id</var>);</code></td>
+			<td>stops the given sound if playing</td>
+		</tr>
+		
+		<tr>
+			<td><code>isPlaying(<var>id</var>)</code></td>
+			<td>returns true if the sound is playing</td>
+		</tr>
+		
+		<tr>
+			<td><code>isLooping(<var>id</var>)</code></td>
+			<td>returns true if the sound is looping</td>
+		</tr>
+		
+		<tr>
+			<td><code>getPosition(<var>id</var>)</code></td>
+			<td>returns time index of playing clip in MS</td>
+		</tr>
+		
+		<tr>
+			<td><code>setPosition(<var>id</var>, <var>ms</var>)</code></td>
+			<td>advances the clip to the given time</td>
+		</tr>
+	</table>
+	
+	<pre><code class="java">
+// convenience methods for playing sounds
+SimpleMedia.with(this).play(R.id.cowabunga);
+SimpleMedia.with(this).loop(R.id.tmnt_theme);
+</code></pre>
+</section-->
+
+<!-- END SLIDES AREA -->
+			</div>
+		</div>
+
+		<script src="highlightjs/highlight.pack.js" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/highlightjs/highlight.pack.js"></script>
+		<script src="cs193a-slides.js" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/cs193a-slides.js"></script>
+		<script src="reveal/js/reveal.js" tppabs="http://web.stanford.edu/class/cs193a/lectures/slides/reveal/js/reveal.js"></script>
+		<script>
+			initializeSlides();
+		</script>
+	</body>
+</html>

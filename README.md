@@ -16,6 +16,12 @@ It contains also basics of Android App development
 - Threads
 - Background Tasks
 - Foreground Tasks
+- Work Manager
+    - Worker
+    - Work Request
+        - One Time
+        - Periodic
+    - Work Manager
 - Notification Managers
 - MVVM Architecture
     - Adapters

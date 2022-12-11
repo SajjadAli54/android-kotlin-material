@@ -1,5 +1,10 @@
-# kotlin-basics
+# Android Apps Development
 
+# Android Studio with Kotlin
+# Flutter with Dart
+
+---
+# Android Studio with Kotlin
 It contains basics of Kotlin
 - Basics
 - Loops
@@ -27,3 +32,16 @@ It contains also basics of Android App development
     - Adapters
 - Database SQLite
 - Music Player
+- Sensors
+- Networking
+    - Volley
+    - HTTP url Connection
+
+# Flutter with Dart
+
+- Introduction
+- Widgets
+- Layouts
+- Custom Layouts
+- Ink Well
+- Dialogs

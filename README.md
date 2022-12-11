@@ -1,18 +1,21 @@
 # Android Apps Development
 
-# Android Studio with Kotlin
-# Flutter with Dart
-
 ---
-# Android Studio with Kotlin
-It contains basics of Kotlin
+
+
+
+## Android Studio with Kotlin
+
+### Kotlin
+
 - Basics
 - Loops
 - Functions
 - Classes
 - Collections
 
-It contains also basics of Android App development
+### Android
+
 - Widgets
 - Layouts
 - Activity Lifecycle
@@ -22,22 +25,24 @@ It contains also basics of Android App development
 - Background Tasks
 - Foreground Tasks
 - Work Manager
-    - Worker
-    - Work Request
-        - One Time
-        - Periodic
-    - Work Manager
+  - Worker
+  - Work Request
+    - One Time
+    - Periodic
+  - Work Manager
 - Notification Managers
 - MVVM Architecture
-    - Adapters
+  - Adapters
 - Database SQLite
 - Music Player
 - Sensors
 - Networking
-    - Volley
-    - HTTP url Connection
+  - Volley
+  - HTTP url Connection
 
-# Flutter with Dart
+---
+
+## Flutter with Dart
 
 - Introduction
 - Widgets

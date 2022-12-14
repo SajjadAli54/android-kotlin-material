@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">ContactsDemo</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Welcome to Contacts App</string>
+    <string name="add_contact">Add Contact</string>
+    <string name="name">Name</string>
+    <string name="street">Street</string>
+    <string name="save_contact">SAVE CONTACT</string>
+    <string name="email">Email</string>
+    <string name="city">City</string>
+    <string name="phone">Phone</string>
+</resources>

@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">MadLibs</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">
+        Welcome to MadLibs! I will ask you to fill in words to complete a
+        story. You will not be able to see the whole story until you are done filling in
+        all the missing words. That is part of the fun. Click below to get started ...
+    </string>
+
+</resources>

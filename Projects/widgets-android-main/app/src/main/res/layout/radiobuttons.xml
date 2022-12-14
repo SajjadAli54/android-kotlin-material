@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center|top"
+    >
+
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <RadioButton
+            android:id="@+id/allama"
+            android:checked="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Allama Iqbal"
+            android:onClick="radioClick"
+            />
+
+        <RadioButton
+            android:id="@+id/edhi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edhi"
+            android:onClick="radioClick"
+            />
+
+        <RadioButton
+            android:id="@+id/quaid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quiad"
+            android:onClick="radioClick"
+            />
+
+        <RadioButton
+            android:id="@+id/sidiqi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nisar Sidiqi"
+            android:onClick="radioClick"
+            />
+
+    </RadioGroup>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/image"
+        android:src="@drawable/allama"
+        />
+</LinearLayout>

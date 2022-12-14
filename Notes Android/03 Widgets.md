@@ -7,17 +7,25 @@
 ### Properties
 
 - id
-- width wrap_content, match_parent, dpi, spi, px
-- height
+- width and height
+  - wrap_content
+  - match_parent
+  - dpi
+  - spi
+  - px
+- onClick
+- tag
+- layout_weight
+- layout_gravity
 - text
 
-res/values for localization
+`res/values` for localization
 
-use as @string/app_name
+use as `@string/app_name`
 
-onCreate -> responsible for layout creation
+`onCreate` -> responsible for layout creation
 
-res/layout -> create layouts
+`res/layout` -> create layouts
 
 ### Constraints
 
@@ -25,33 +33,35 @@ Apply those which you need, not all
 
 ### Code
 
+```
 val myTextView: TextView = findViewById(R.id.txtName);
-
 myTextView.text = "Walaikum salam"
-
 var name: String = myTextView.text.toString()
+```
 
-Check messages using logcat
+Check messages using `Logcat`
 
 #### global variable
 
+```
 var myTextView : TextView? = null // not preferred
 
 lateinit var txtView: TextView
+```
 
 #### Parsing
 
-var number : Int = Integer.parseInt(value)
+`var number : Int = Integer.parseInt(value)`
 
 ## ImageView
 
-Put images in drawable folder
+Put `images` in `drawable` folder
 
-name must be in all small, underscore or numbers
+name must be in all `small, underscore or numbers`
 
 ### Properties
 
-1. srcCombat -> Give images source
+1. `srcCombat` -> Give images source
 
 ## Event Handler
 
@@ -61,8 +71,8 @@ name must be in all small, underscore or numbers
 2. void return type
 3. takes an argument of View type
 
+```
 fun clickMe(view: View){
-
     Log.d("Counter ${++counter}")
-
 }
+```

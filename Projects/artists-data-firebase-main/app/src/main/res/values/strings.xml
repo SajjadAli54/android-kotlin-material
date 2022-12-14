@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">InsertArtistsData</string>
+    <string-array name="data">
+        <item>Rock</item>
+        <item>Pop</item>
+        <item>Jazz</item>
+        <item>Sufi</item>
+        <item>Folk</item>
+    </string-array>
+</resources>

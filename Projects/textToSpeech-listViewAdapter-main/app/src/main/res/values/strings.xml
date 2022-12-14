@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">ListView and Adapter</string>
+    <string-array name="OS">
+        <item>Windows</item>
+        <item>Linux</item>
+        <item>Mac</item>
+        <item>Android</item>
+        <item>Windows</item>
+        <item>Linux</item>
+        <item>Mac OS</item>
+    </string-array>
+</resources>

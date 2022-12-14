@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string-array name="data">
+        <item>Allama Iqbal</item>
+        <item>Edhi</item>
+        <item>Quaid Azam</item>
+        <item>Sir Nisar</item>
+    </string-array>
+</resources>

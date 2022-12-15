@@ -3,10 +3,11 @@
 Add Internet permissions in Manifest file
 
 ```xml
- <uses-permission android:name="android.permission.INTERNET"/>
+<uses-permission android:name="android.permission.INTERNET" />
 ```
 
 Add depedency
+
 ```gradle
 implementation 'com.android.volley:volley:1.2.1'
 ```
@@ -48,28 +49,29 @@ class MainActivity : AppCompatActivity() {
 UI Code
 
 ```xml
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  tools:context=".MainActivity"
+>
 
     <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+  >
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hello World!"
-            android:id="@+id/textview"
-            />
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Hello World!"
+      android:id="@+id/textview"
+    />
     </ScrollView>
 
 </LinearLayout>
 ```
 
-I have just shown the `JSON` data returned from the url into `TextView`. However, If you want to parse the JSON data into your own data object (Obviously you would need to do that in your real life projects), then you can use `GSON` library. I already have used GSON library with `HttpURLConnection` at 
-https://github.com/SajjadAli54/android-networking.git. HttpURLConnection is much faster than volley and also core library of android so you do not need to add the dependecy for using it. If you either want to use GSON or HttpURLConnection, I would recommend you to have a look at that one also. Thanks!
+I have just shown the `JSON` data returned from the url into `TextView`. However, If you want to parse the JSON data into your own data object (Obviously you would need to do that in your real life projects), then you can use `GSON` library. I already have used GSON library with `HttpURLConnection` at https://github.com/SajjadAli54/android-material/tree/main/Projects/android-networking-main. HttpURLConnection is much faster than volley and also core library of android so you do not need to add the dependecy for using it. If you either want to use GSON or HttpURLConnection, I would recommend you to have a look at that one also. Thanks!
